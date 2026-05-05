@@ -1,239 +1,245 @@
 """
-utils/state.py
-State management wrapper for new dashboard pages.
-Bridges utils.state_manager + adds calculation functions.
+utils/state.py  –  Hofakkers 44
+Single state layer: init, getters, setters, berekeningen.
+
+BUGS FIXED:
+- calc_verbouwing_totalen: returnt nu {"categorieën": {cat: bedrag}, "totaal": float}
+- calc_inboedel_totalen:   zelfde structuur
+- calc_maand_totalen:      leest correct uit maand-lijst + dashboard fallback
+- calc_project:            leest verbouwing + inboedel totalen correct
+- calc_spaargeld:          leest vermogenswaarden uit dashboard (echte Excel-keys)
+- save_all_to_excel:       geeft session_state correct door aan save_all_data()
+- sparen() / hypotheek()   toegevoegd
 """
 import streamlit as st
 import pandas as pd
-from utils.state_manager import (
-    init_session_state, reload_from_excel, get_dashboard, 
-    get_dashboard_df, save_dashboard_df, get_rooms, add_room,
-    get_verbouwing, get_verbouwing_voor_kamer
-)
 from utils.excel_handler import load_all_data, save_all_data
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# INITIALIZATION
-# ─────────────────────────────────────────────────────────────────────────
+# ── Initialisatie ──────────────────────────────────────────────────────────
 
 def init() -> None:
-    """Initialize session state (calls state_manager.init_session_state)."""
-    init_session_state()
+    """Laad Excel eenmalig in session_state."""
+    if st.session_state.get("_loaded"):
+        return
+    data = load_all_data()
+    for k, v in data.items():
+        st.session_state[k] = v
+    st.session_state["_loaded"] = True
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# DASHBOARD GETTERS / SETTERS
-# ─────────────────────────────────────────────────────────────────────────
+def reload() -> None:
+    st.session_state.pop("_loaded", None)
+    init()
+
+
+# ── Getters ────────────────────────────────────────────────────────────────
 
 def dash() -> dict:
-    """Get dashboard dict from session."""
     return st.session_state.get("dashboard", {})
 
 
-def set_dashboard(data: dict) -> None:
-    """Set dashboard dict in session."""
-    st.session_state["dashboard"] = data
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# VERBOUWING GETTERS / SETTERS
-# ─────────────────────────────────────────────────────────────────────────
-
 def verbouwing() -> pd.DataFrame:
-    """Get verbouwing dataframe from session."""
     return st.session_state.get("verbouwing", pd.DataFrame())
 
 
-def set_verbouwing(df: pd.DataFrame) -> None:
-    """Set verbouwing dataframe in session."""
-    st.session_state["verbouwing"] = df.copy()
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# INBOEDEL GETTERS / SETTERS
-# ─────────────────────────────────────────────────────────────────────────
-
 def inboedel() -> pd.DataFrame:
-    """Get inboedel dataframe from session."""
     return st.session_state.get("inboedel", pd.DataFrame())
 
 
-def set_inboedel(df: pd.DataFrame) -> None:
-    """Set inboedel dataframe in session."""
-    st.session_state["inboedel"] = df.copy()
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# MAAND (CASHFLOW) GETTERS / SETTERS
-# ─────────────────────────────────────────────────────────────────────────
-
 def maand() -> list:
-    """Get maandelijkse begroting (list of dicts) from session."""
     return st.session_state.get("maand", [])
 
 
-def set_maand(data: list) -> None:
-    """Set maandelijkse begroting in session."""
-    st.session_state["maand"] = data
+def sparen() -> dict:
+    return st.session_state.get("sparen", {})
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# CALCULATION FUNCTIONS
-# ─────────────────────────────────────────────────────────────────────────
+def hypotheek() -> dict:
+    return st.session_state.get("hypotheek", {})
+
+
+# ── Setters ────────────────────────────────────────────────────────────────
+
+def set_dashboard(data: dict) -> None:
+    st.session_state["dashboard"] = data
+
+
+def set_verbouwing(df: pd.DataFrame) -> None:
+    st.session_state["verbouwing"] = df.copy()
+
+
+def set_inboedel(df: pd.DataFrame) -> None:
+    st.session_state["inboedel"] = df.copy()
+
+
+def set_maand(rows: list) -> None:
+    st.session_state["maand"] = rows
+
+
+# ── Helper ─────────────────────────────────────────────────────────────────
+
+def _sf(v) -> float:
+    try:
+        return float(v or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+# ── Berekeningen ───────────────────────────────────────────────────────────
 
 def calc_verbouwing_totalen() -> dict:
     """
-    Calculate verbouwing totals by category.
-    Returns: {"categorie": {"aantal": int, "totaal": float, "count": int}, ...}
+    Retourneert {"categorieën": {cat: totaal_bedrag, ...}, "totaal": float}.
+    Gebruikt door app.py (donut chart) en 1_Verbouwing.py.
     """
-    verb = verbouwing()
-    if verb.empty or "Categorie" not in verb.columns:
-        return {}
-    
-    result = {}
-    for _, row in verb.iterrows():
-        cat = str(row.get("Categorie", "Overig")).strip()
-        if not cat or cat.lower() == "nan":
-            cat = "Overig"
-        
-        if cat not in result:
-            result[cat] = {"aantal": 0, "totaal": 0.0, "count": 0}
-        
-        try:
-            result[cat]["aantal"] += float(row.get("Aantal", 0) or 0)
-            result[cat]["totaal"] += float(row.get("Totaal (€)", 0) or 0)
-            result[cat]["count"] += 1
-        except (ValueError, TypeError):
-            pass
-    
-    return result
+    df = verbouwing()
+    if df.empty or "Categorie" not in df.columns:
+        return {"categorieën": {}, "totaal": 0.0}
+
+    df = df.copy()
+    df["Totaal (€)"] = pd.to_numeric(df["Totaal (€)"], errors="coerce").fillna(0)
+    cats = (
+        df.groupby("Categorie")["Totaal (€)"]
+        .sum()
+        .where(lambda x: x > 0)
+        .dropna()
+        .to_dict()
+    )
+    return {"categorieën": cats, "totaal": sum(cats.values())}
 
 
 def calc_inboedel_totalen() -> dict:
     """
-    Calculate inboedel totals by category.
-    Returns: {"categorie": {"aantal": int, "totaal": float, "count": int}, ...}
+    Retourneert {"categorieën": {cat: totaal_bedrag, ...}, "totaal": float}.
     """
-    inb = inboedel()
-    if inb.empty or "Categorie" not in inb.columns:
-        return {}
-    
-    result = {}
-    for _, row in inb.iterrows():
-        cat = str(row.get("Categorie", "Overig")).strip()
-        if not cat or cat.lower() == "nan":
-            cat = "Overig"
-        
-        if cat not in result:
-            result[cat] = {"aantal": 0, "totaal": 0.0, "count": 0}
-        
-        try:
-            result[cat]["aantal"] += float(row.get("Aantal", 0) or 0)
-            result[cat]["totaal"] += float(row.get("Totaal (€)", 0) or 0)
-            result[cat]["count"] += 1
-        except (ValueError, TypeError):
-            pass
-    
-    return result
+    df = inboedel()
+    if df.empty or "Categorie" not in df.columns:
+        return {"categorieën": {}, "totaal": 0.0}
+
+    df = df.copy()
+    df["Totaal (€)"] = pd.to_numeric(df["Totaal (€)"], errors="coerce").fillna(0)
+    cats = (
+        df.groupby("Categorie")["Totaal (€)"]
+        .sum()
+        .where(lambda x: x > 0)
+        .dropna()
+        .to_dict()
+    )
+    return {"categorieën": cats, "totaal": sum(cats.values())}
 
 
 def calc_maand_totalen() -> dict:
     """
-    Calculate monthly cashflow totals.
-    Returns: {"inkomsten": float, "uitgaven": float, "sparen": float, "saldo": float}
+    Retourneert cashflow-samenvatting:
+    {inkomen, vaste, variabel, sparen, ruimte, totaal_uitgaven}
+
+    Primaire bron: Dashboard PRO (exacte keys uit de echte Excel).
+    Fallback: aggregatie van maand-lijst als Dashboard leeg is.
     """
-    m = maand()
-    if not m:
-        return {
-            "inkomsten": 0.0,
-            "uitgaven": 0.0,
-            "sparen": 0.0,
-            "saldo": 0.0,
-        }
-    
-    inkomsten = sum(float(item.get("inkomsten", 0) or 0) for item in m)
-    uitgaven = sum(float(item.get("uitgaven", 0) or 0) for item in m)
-    sparen = sum(float(item.get("sparen", 0) or 0) for item in m)
-    saldo = inkomsten - uitgaven
-    
+    d = dash()
+
+    # ── Primaire bron: Dashboard PRO ──
+    inkomen  = _sf(d.get("Netto inkomen per maand"))
+    vaste    = _sf(d.get("Vaste lasten per maand (wonen + verzekeringen + vervoer)"))
+    variabel = _sf(d.get("Variabele lasten per maand (boodschappen + vrijetijd)"))
+    spar     = _sf(d.get("Sparen & beleggen per maand"))
+
+    # Als dashboard leeg is, aggregeer uit maand-lijst
+    if inkomen == 0:
+        rows = maand()
+        for row in rows:
+            cat = str(row.get("Categorie", "")).upper()
+            bedrag = _sf(row.get("Bedrag (€)") or row.get("bedrag"))
+            if "INKOMST" in cat:
+                inkomen += bedrag
+            elif cat in ("WONEN", "VERZEKERING", "VERVOER", "VASTE"):
+                vaste += bedrag
+            elif cat in ("BOODSCHAP", "VARIABEL", "PERSOONLIJK", "VRIJETIJD", "HUISHOUD"):
+                variabel += bedrag
+            elif "SPAR" in cat or "BELEGG" in cat:
+                spar += bedrag
+
+    totaal_uitgaven = vaste + variabel + spar
+    ruimte = inkomen - totaal_uitgaven
+
     return {
-        "inkomsten": inkomsten,
-        "uitgaven": uitgaven,
-        "sparen": sparen,
-        "saldo": saldo,
+        "inkomen":         inkomen,
+        "vaste":           vaste,
+        "variabel":        variabel,
+        "sparen":          spar,
+        "ruimte":          ruimte,
+        "totaal_uitgaven": totaal_uitgaven,
     }
 
 
 def calc_project() -> dict:
     """
-    Calculate project totals from verbouwing data.
-    Returns: {"budget": float, "besteed": float, "resterend": float, "pct": float}
+    Project-totalen:
+    {verbouwing, inboedel, project, per_persoon, samen, patrick, willianne}
+
+    Primaire bron: berekend uit verbouwing/inboedel DataFrames.
+    Overrides: uit Dashboard PRO als die er zijn.
     """
-    verb = verbouwing()
-    if verb.empty:
-        return {
-            "budget": 0.0,
-            "besteed": 0.0,
-            "resterend": 0.0,
-            "pct": 0.0,
-        }
-    
-    try:
-        budget = float(verb.get("Totaal (€)", 0).sum() if "Totaal (€)" in verb.columns else 0)
-    except (ValueError, TypeError):
-        budget = 0.0
-    
-    # Extract actual spent from dashboard or calculate from bonnen
-    dashboard = dash()
-    besteed = float(dashboard.get("Totaal Besteed", 0) or 0)
-    
-    resterend = budget - besteed
-    pct = (besteed / max(budget, 1)) * 100 if budget > 0 else 0
-    
+    d = dash()
+
+    vt = calc_verbouwing_totalen()
+    it = calc_inboedel_totalen()
+
+    verb_calc  = vt["totaal"]
+    inbo_calc  = it["totaal"]
+
+    # Dashboard kan override bevatten
+    verb_tot   = _sf(d.get("Verbouwing (totaal)")) or verb_calc
+    inbo_tot   = _sf(d.get("Inboedel (totaal)"))   or inbo_calc
+    project    = verb_tot + inbo_tot
+
+    per_persoon = _sf(d.get("Benodigd per persoon")) or (project / 2 if project else 0)
+    samen       = _sf(d.get("Samen vermogen na verbouwing"))
+    patrick     = _sf(d.get("Vermogen Patrick na verbouwing"))
+    willianne   = _sf(d.get("Vermogen Willianne na verbouwing"))
+
     return {
-        "budget": budget,
-        "besteed": besteed,
-        "resterend": resterend,
-        "pct": pct,
+        "verbouwing":  verb_tot,
+        "inboedel":    inbo_tot,
+        "project":     project,
+        "per_persoon": per_persoon,
+        "samen":       samen,
+        "patrick":     patrick,
+        "willianne":   willianne,
     }
 
 
 def calc_spaargeld() -> dict:
     """
-    Calculate savings/vermogen for Patrick & Willianne.
-    Returns: {"patrick": float, "willianne": float, "samen": float, "gespaard": float}
+    Vermogensoverzicht Patrick & Willianne.
+    Leest uitsluitend uit Dashboard PRO (echte Excel-keys).
     """
-    dashboard = dash()
-    
-    pat = float(dashboard.get("Totaal Inleg Patrick", 0) or 0)
-    wil = float(dashboard.get("Totaal Inleg Willianne", 0) or 0)
-    zusammen = pat + wil
-    
-    # Gespaard = total incomings - verbouwing budget
-    project = calc_project()
-    gespaard = zusammen - project["budget"]
-    
+    d = dash()
+    patrick   = _sf(d.get("Vermogen Patrick na verbouwing"))
+    willianne = _sf(d.get("Vermogen Willianne na verbouwing"))
+    samen     = _sf(d.get("Samen vermogen na verbouwing")) or (patrick + willianne)
+    gespaard  = _sf(d.get("Totaal sparen + beleggen nu"))
+
     return {
-        "patrick": pat,
-        "willianne": wil,
-        "samen": zusammen,
-        "gespaard": max(gespaard, 0),
+        "patrick":       patrick,
+        "willianne":     willianne,
+        "samen":         samen,
+        "totaal_sparen": gespaard,
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# SAVE FUNCTIONS (delegates to excel_handler)
-# ─────────────────────────────────────────────────────────────────────────
+# ── Excel opslaan ──────────────────────────────────────────────────────────
 
 def save_all_to_excel() -> bool:
-    """
-    Save all state to Excel.
-    Returns True if successful.
-    """
-    try:
-        save_all_data()
-        return True
-    except Exception as e:
-        st.error(f"Error saving to Excel: {e}")
-        return False
+    """Schrijf volledige session_state terug naar Excel."""
+    return save_all_data({
+        "dashboard":  st.session_state.get("dashboard", {}),
+        "verbouwing": st.session_state.get("verbouwing", pd.DataFrame()),
+        "inboedel":   st.session_state.get("inboedel",   pd.DataFrame()),
+        "maand":      st.session_state.get("maand",      []),
+        "taken":      st.session_state.get("taken",      {}),
+        "kosten":     st.session_state.get("kosten",     {}),
+        "wensen":     st.session_state.get("wensen",     {}),
+        "bonnen":     st.session_state.get("bonnen",     []),
+    })

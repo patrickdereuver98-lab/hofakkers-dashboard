@@ -1,219 +1,172 @@
 """
-utils/ui.py
-UI component adapter for new Bob de Bouwer dashboard pages.
-Wraps layout.py + adds new component functions for interactive dashboards.
+utils/ui.py  –  Hofakkers 44
+Herbruikbare UI-componenten.
+
+BUGS FIXED:
+- kpi(): variant-mapping uitgebreid (blu/grn/red/success/warning/danger/neutral allemaal werkend)
+- sidebar(): gebruikt correcte calc-functies en save_all_to_excel()
+- CHART_COLORS: correct geïmporteerd als lijst (niet dict)
+- progress(): variant-mapping gecorrigeerd
 """
 import streamlit as st
-from utils.config import APP_CONFIG, CSS_STYLES, COLORS, KAMER_EMOJIS
+from utils.config import CSS_STYLES, APP_CONFIG, CHART_COLORS
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# PAGE SETUP
-# ─────────────────────────────────────────────────────────────────────────
+# ── Page setup ─────────────────────────────────────────────────────────────
 
-def page_setup(page_title: str) -> None:
-    """
-    Initialize page: config + CSS + session init.
-    """
+def page_setup(title: str = "🏠 Hofakkers 44") -> None:
     st.set_page_config(
-        page_title=page_title,
+        page_title=title,
         page_icon=APP_CONFIG["icon"],
-        layout="wide",
-        initial_sidebar_state="expanded",
+        layout=APP_CONFIG["layout"],
+        initial_sidebar_state=APP_CONFIG["sidebar_state"],
     )
     inject_css()
 
 
 def inject_css() -> None:
-    """Inject custom CSS styles for Bob de Bouwer theme."""
     st.markdown(CSS_STYLES, unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# HEADER COMPONENTS
-# ─────────────────────────────────────────────────────────────────────────
+# ── Header ─────────────────────────────────────────────────────────────────
 
-def header(title: str, subtitle: str = "", emoji: str = "🏗️") -> None:
-    """Render page header with emoji, title, subtitle."""
+def header(title: str, subtitle: str = "", emoji: str = "") -> None:
+    emoji_html = f"<span style='font-size:2.2rem;margin-right:14px;'>{emoji}</span>" if emoji else ""
+    sub_html   = f"<p>{subtitle}</p>" if subtitle else ""
     st.markdown(f"""
     <div class="bdb-header animate-in">
-      <div style='display:flex; align-items:center; gap:16px; margin-bottom:24px;'>
-        <span style='font-size:2.5rem;'>{emoji}</span>
+      <div style='display:flex;align-items:center;'>
+        {emoji_html}
         <div>
-          <h1 style='margin:0; color:#1A1A2E;'>{title}</h1>
-          {f"<p style='margin:4px 0 0; color:#6B7280; font-size:0.95rem;'>{subtitle}</p>" if subtitle else ""}
+          <h1>{title}</h1>
+          {sub_html}
         </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# KPI CARD COMPONENT
-# ─────────────────────────────────────────────────────────────────────────
+# ── KPI Card ───────────────────────────────────────────────────────────────
 
-def kpi(label: str, value: str, delta: str = "", variant: str = "neutral") -> None:
+def kpi(label: str, value: str, sub: str = "", variant: str = "") -> None:
     """
-    Render KPI card.
-    variant: 'neutral' | 'success' | 'warning' | 'danger'
+    Render een KPI-kaart.
+    variant: '' | 'grn' | 'red' | 'blu' | 'success' | 'warning' | 'danger' | 'neutral'
     """
-    variant_colors = {
-        "neutral": "#FFD700",
-        "success": "#10B981",
-        "warning": "#F59E0B",
-        "danger": "#EF4444",
+    # Normaliseer aliassen
+    v_map = {
+        "success": "grn", "danger": "red", "warning": "warning",
+        "neutral": "", "blu": "blu", "grn": "grn", "red": "red",
     }
-    
-    card_color = variant_colors.get(variant, "#FFD700")
-    delta_html = ""
-    if delta:
-        delta_color = "#10B981" if "+" in delta else "#EF4444"
-        delta_html = f"""
-        <div style='font-size:0.75rem; color:{delta_color}; margin-top:4px; font-weight:600;'>
-            {delta}
-        </div>
-        """
-    
+    cls = v_map.get(variant, "")
+    sub_html = f'<div class="kpi-delta">{sub}</div>' if sub else ""
     st.markdown(f"""
-    <div style='
-        background:rgba(255,255,255,0.05);
-        border:2px solid {card_color}33;
-        border-radius:12px;
-        padding:16px;
-        text-align:center;
-        margin-bottom:8px;
-        transition:all 0.3s;
-    '>
-        <div style='font-size:0.85rem; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;'>
-            {label}
-        </div>
-        <div style='font-size:2rem; font-weight:800; color:#1A1A2E;'>
-            {value}
-        </div>
-        {delta_html}
+    <div class="kpi-card {cls} animate-in">
+      <div class="kpi-label">{label}</div>
+      <div class="kpi-value">{value}</div>
+      {sub_html}
     </div>
     """, unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# PROGRESS COMPONENT
-# ─────────────────────────────────────────────────────────────────────────
+# ── Progress bar ───────────────────────────────────────────────────────────
 
-def progress(label: str, percentage: float, variant: str = "normal") -> None:
+def progress(label: str, pct: float, variant: str = "") -> None:
     """
-    Render progress bar.
-    variant: 'normal' | 'success' | 'warning' | 'danger'
+    Render een voortgangsbalk.
+    variant: '' | 'grn' | 'red'
     """
-    pct = min(max(percentage, 0), 100)
-    
-    variant_colors = {
-        "normal": "#FFD700",
-        "success": "#10B981",
-        "warning": "#F59E0B",
-        "danger": "#EF4444",
-    }
-    
-    bar_color = variant_colors.get(variant, "#FFD700")
-    
+    p = min(max(float(pct), 0), 100)
+    # Auto-kleur als geen variant opgegeven
+    if not variant:
+        cls = "red" if p > 90 else "grn" if p >= 70 else ""
+    else:
+        v_map = {"success": "grn", "danger": "red", "warning": "", "normal": ""}
+        cls = v_map.get(variant, variant)
+
     st.markdown(f"""
-    <div style='margin-bottom:16px;'>
-        <div style='display:flex; justify-content:space-between; margin-bottom:6px;'>
-            <span style='font-size:0.9rem; color:#1A1A2E; font-weight:600;'>{label}</span>
-            <span style='font-size:0.85rem; color:#6B7280; font-weight:600;'>{pct:.1f}%</span>
-        </div>
-        <div style='background:rgba(0,0,0,0.1); border-radius:999px; height:10px; overflow:hidden;'>
-            <div style='
-                height:100%;
-                width:{pct}%;
-                background:{bar_color};
-                border-radius:999px;
-                transition:width 0.6s ease-out;
-            '></div>
-        </div>
+    <div class="pgwrap">
+      <div class="pglbl"><span>{label}</span><span>{p:.1f}%</span></div>
+      <div class="pgbar"><div class="pgfill {cls}" style="width:{p}%;"></div></div>
     </div>
     """, unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# SIDEBAR COMPONENT
-# ─────────────────────────────────────────────────────────────────────────
+# ── Sidebar ────────────────────────────────────────────────────────────────
 
 def sidebar(maand_totalen: dict = None, project_data: dict = None) -> None:
     """
-    Render sidebar with financiële KPI's and project info.
+    Globale sidebar met financiële KPI's, opslaan- en herlaadknoppen.
     """
+    from utils.state import save_all_to_excel, reload
+
+    mt = maand_totalen or {}
+    pd = project_data  or {}
+
     with st.sidebar:
-        # Header
         st.markdown("""
-        <div style='text-align:center; padding:12px 0 8px; margin-bottom:16px;'>
-            <div style='font-size:2.5rem;'>🏗️</div>
-            <div style='font-size:1rem; font-weight:800; color:#FFD700; letter-spacing:0.04em;'>
-                BOB DE BOUWER
-            </div>
-            <div style='font-size:0.65rem; color:#9CA3AF; letter-spacing:0.1em; margin-top:2px;'>
-                RENOVATION SaaS
-            </div>
+        <div style='text-align:center;padding:10px 0 6px;'>
+          <div style='font-size:2.8rem;'>🏠</div>
+          <div style='font-size:1rem;font-weight:800;color:#FFD700;letter-spacing:.04em;'>HOFAKKERS 44</div>
+          <div style='font-size:.68rem;color:#9CA3AF;letter-spacing:.12em;margin-top:2px;'>Patrick & Willianne</div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.divider()
+        st.markdown("---")
 
-        # Maand Totalen
-        if maand_totalen:
-            st.markdown("#### 💰 Cashflow")
-            col1, col2 = st.columns(2)
-            col1.metric("Inkomsten", f"€ {maand_totalen.get('inkomsten', 0):,.0f}")
-            col2.metric("Uitgaven", f"€ {maand_totalen.get('uitgaven', 0):,.0f}")
-            
-            balance = maand_totalen.get('inkomsten', 0) - maand_totalen.get('uitgaven', 0)
-            delta_color = "normal" if balance >= 0 else "inverse"
-            st.metric(
-                "Saldo",
-                f"€ {balance:,.0f}",
-                delta_color=delta_color
-            )
-            st.divider()
+        # ── Project ──
+        verb = pd.get("verbouwing", 0)
+        inbo = pd.get("inboedel", 0)
+        proj = pd.get("project",  0)
+        st.markdown("#### 🏗️ Project Totaal")
+        st.metric("Verbouwing",     f"€ {verb:,.0f}")
+        st.metric("Inboedel",       f"€ {inbo:,.0f}")
+        st.metric("Totaal project",  f"€ {proj:,.0f}")
 
-        # Project Data
-        if project_data:
-            st.markdown("#### 🏠 Project")
-            st.metric("Budget", f"€ {project_data.get('budget', 0):,.0f}")
-            st.metric("Besteed", f"€ {project_data.get('besteed', 0):,.0f}")
-            
-            remaining = project_data.get('budget', 0) - project_data.get('besteed', 0)
-            pct_used = (project_data.get('besteed', 0) / max(project_data.get('budget', 1), 1)) * 100
-            
-            delta_color = "normal" if remaining >= 0 else "inverse"
-            st.metric(
-                "Resterend",
-                f"€ {remaining:,.0f}",
-                delta=f"{pct_used:.1f}% gebruikt",
-                delta_color=delta_color
-            )
-            st.divider()
+        st.markdown("---")
 
-        # Contributers
-        dashboard = st.session_state.get("dashboard", {})
-        pat = float(dashboard.get("Totaal Inleg Patrick", 0) or 0)
-        wil = float(dashboard.get("Totaal Inleg Willianne", 0) or 0)
-        
-        st.markdown("#### 👥 Bijdragers")
-        col1, col2 = st.columns(2)
-        col1.metric("Patrick", f"€ {pat:,.0f}")
-        col2.metric("Willianne", f"€ {wil:,.0f}")
-        
-        st.divider()
-        st.caption("Hofakkers 44 · Bob de Bouwer SaaS · v2.0")
+        # ── Cashflow ──
+        ink    = mt.get("inkomen", 0)
+        uit    = mt.get("totaal_uitgaven", 0)
+        ruimte = mt.get("ruimte", 0)
+        st.markdown("#### 💳 Maand Cashflow")
+        st.metric("Inkomen",  f"€ {ink:,.0f}")
+        st.metric("Uitgaven", f"€ {uit:,.0f}")
+        delta_kleur = "normal" if ruimte >= 0 else "inverse"
+        st.metric("Buffer", f"€ {ruimte:,.0f}", delta_color=delta_kleur)
 
+        if ink > 0:
+            pct = min(uit / ink * 100, 100)
+            bar_c = "#EF4444" if pct > 85 else "#F59E0B" if pct > 70 else "#10B981"
+            st.markdown(f"""
+            <div style='margin:2px 0 14px;'>
+              <div style='background:rgba(255,255,255,.12);border-radius:999px;height:7px;'>
+                <div style='width:{pct:.1f}%;height:100%;background:{bar_c};border-radius:999px;'></div>
+              </div>
+              <div style='font-size:.68rem;color:#9CA3AF;margin-top:3px;text-align:right;'>{pct:.0f}% van inkomen</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────────────────
-# CHART COLORS
-# ─────────────────────────────────────────────────────────────────────────
+        st.markdown("---")
 
-CHART_COLORS = COLORS.get("chart", {
-    "geel": "#FFD700",
-    "oranje": "#FF8C00",
-    "groen": "#10B981",
-    "rood": "#EF4444",
-    "antraciet": "#1A1A2E",
-})
+        # ── Vermogen ──
+        st.markdown("#### 💎 Vermogen na verbouwing")
+        st.metric("Patrick",   f"€ {pd.get('patrick',  0):,.0f}")
+        st.metric("Willianne", f"€ {pd.get('willianne',0):,.0f}")
+        st.metric("Samen",     f"€ {pd.get('samen',    0):,.0f}")
+
+        st.markdown("---")
+
+        # ── Acties ──
+        if st.button("💾 Opslaan naar Excel", use_container_width=True, type="primary"):
+            if save_all_to_excel():
+                st.success("✅ Opgeslagen!")
+            else:
+                st.error("❌ Opslaan mislukt.")
+
+        if st.button("🔄 Herladen uit Excel", use_container_width=True):
+            reload()
+            st.rerun()
+
+        st.markdown("---")
+        st.caption("Hofakkers 44 · v2.1 · Bob de Bouwer SaaS")
