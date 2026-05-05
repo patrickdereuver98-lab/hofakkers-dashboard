@@ -66,7 +66,7 @@ with tabs[0]:
                     x=0.5, y=0.5, font_size=12, showarrow=False,
                 )],
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
     with col_r:
         st.markdown("##### 📊 Procentueel van Inkomen")
@@ -100,7 +100,7 @@ with tabs[0]:
             df_m["Bedrag (€)"] = pd.to_numeric(df_m["Bedrag (€)"], errors="coerce").fillna(0)
         st.dataframe(
             df_m.style.format({"Bedrag (€)": "€ {:,.2f}"}),
-            use_container_width=True,
+            width='stretch',
             height=400,
             hide_index=True,
         )
@@ -123,19 +123,19 @@ with tabs[1]:
             "Bedrag (€)": st.column_config.NumberColumn("Bedrag (€)", format="€ %.2f", min_value=0),
         },
         num_rows="dynamic",
-        use_container_width=True,
+        width='stretch',
         height=450,
         key="editor_maand",
     )
 
     c1b, c2b = st.columns(2)
     with c1b:
-        if st.button("💾 Opslaan in App", type="primary", use_container_width=True):
+        if st.button("💾 Opslaan in App", type="primary", width='stretch'):
             set_maand(edited.to_dict(orient="records"))
             st.success("✅ Maandbegroting bijgewerkt!")
             st.rerun()
     with c2b:
-        if st.button("💾 Naar Excel", use_container_width=True):
+        if st.button("💾 Naar Excel", width='stretch'):
             set_maand(edited.to_dict(orient="records"))
             if excel_save_maand(edited.to_dict(orient="records")):
                 st.success("✅ Opgeslagen!")

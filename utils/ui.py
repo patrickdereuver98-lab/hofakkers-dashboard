@@ -32,13 +32,13 @@ def inject_css() -> None:
 
 def header(title: str, subtitle: str = "", emoji: str = "") -> None:
     emoji_html = f"<span style='font-size:2.2rem;margin-right:14px;'>{emoji}</span>" if emoji else ""
-    sub_html   = f"<p>{subtitle}</p>" if subtitle else ""
+    sub_html   = f"<p style='color:rgba(26,26,46,.75);margin:4px 0 0;font-size:.95rem;'>{subtitle}</p>" if subtitle else ""
     st.markdown(f"""
-    <div class="bdb-header animate-in">
+    <div style='background:linear-gradient(100deg,#FFD700,#FF8C00);border-radius:20px;padding:22px 30px;margin-bottom:22px;box-shadow:0 12px 40px rgba(0,0,0,0.14);position:relative;overflow:hidden;'>
       <div style='display:flex;align-items:center;'>
         {emoji_html}
         <div>
-          <h1>{title}</h1>
+          <h1 style='color:#1A1A2E;margin:0;font-size:1.9rem;font-weight:800;'>{title}</h1>
           {sub_html}
         </div>
       </div>
@@ -158,13 +158,13 @@ def sidebar(maand_totalen: dict = None, project_data: dict = None) -> None:
         st.markdown("---")
 
         # ── Acties ──
-        if st.button("💾 Opslaan naar Excel", use_container_width=True, type="primary"):
+        if st.button("💾 Opslaan naar Excel", width='stretch', type="primary"):
             if save_all_to_excel():
                 st.success("✅ Opgeslagen!")
             else:
                 st.error("❌ Opslaan mislukt.")
 
-        if st.button("🔄 Herladen uit Excel", use_container_width=True):
+        if st.button("🔄 Herladen uit Excel", width='stretch'):
             reload()
             st.rerun()
 

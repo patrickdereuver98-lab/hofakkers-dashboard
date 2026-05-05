@@ -52,7 +52,7 @@ with col_l:
         annotations=[dict(text=f"<b>€ {verm['samen']:,.0f}</b><br>samen",
                           x=0.5, y=0.5, font_size=12, showarrow=False)],
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 # ── Waterval: project berekening ───────────────────────────────────────────────
 with col_r:
@@ -81,7 +81,7 @@ with col_r:
         margin=dict(l=0,r=0,t=10,b=0), height=300, showlegend=False,
         yaxis=dict(tickprefix="€"),
     )
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, width='stretch')
 
 st.markdown("---")
 
@@ -138,8 +138,8 @@ proj_data = [
 df_proj = pd.DataFrame(proj_data, columns=["Omschrijving","Bedrag (€)"])
 st.dataframe(
     df_proj.style.format({"Bedrag (€)": "€ {:,.0f}"})
-                 .applymap(lambda x: "color: #10B981" if isinstance(x, (int,float)) and x > 0 else
+                 .map(lambda x: "color: #10B981" if isinstance(x, (int,float)) and x > 0 else
                            ("color: #EF4444" if isinstance(x, (int,float)) and x < 0 else ""),
                            subset=["Bedrag (€)"]),
-    use_container_width=True, hide_index=True,
+    width='stretch', hide_index=True,
 )

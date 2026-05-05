@@ -114,7 +114,7 @@ with col_l:
                 showarrow=False,
             )],
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     else:
         st.info("Geen verbouwingsdata geladen uit Excel.")
 
@@ -140,7 +140,7 @@ with col_r:
                 showarrow=False,
             )],
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
     else:
         st.info("Geen inboedeldata geladen uit Excel.")
 
@@ -179,7 +179,7 @@ with col_c:
                 showarrow=False,
             )],
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
     else:
         st.info("Geen cashflow-data. Controleer 'Maandbegroting' sheet of vul Projectinstellingen in.")
 
@@ -228,7 +228,7 @@ if cats_v:
         height=max(240, len(cats_v) * 42),
         font=dict(family="Inter"),
     )
-    st.plotly_chart(fig4, use_container_width=True)
+    st.plotly_chart(fig4, width='stretch')
 
 st.markdown("---")
 
@@ -264,7 +264,7 @@ if cats_i:
         height=max(240, len(cats_i) * 42),
         font=dict(family="Inter"),
     )
-    st.plotly_chart(fig5, use_container_width=True)
+    st.plotly_chart(fig5, width='stretch')
 
 st.markdown("---")
 
@@ -276,7 +276,7 @@ with st.expander("⚙️ Projectinstellingen aanpassen (Dashboard PRO)", expande
     d_data = dash()
     if d_data:
         df_dash = pd.DataFrame(
-            list(d_data.items()),
+            [(k, str(v)) for k, v in d_data.items()],
             columns=["Instelling", "Waarde"],
         )
         edited = st.data_editor(
@@ -286,7 +286,7 @@ with st.expander("⚙️ Projectinstellingen aanpassen (Dashboard PRO)", expande
                 "Waarde":     st.column_config.TextColumn("Waarde",     width="medium"),
             },
             num_rows="dynamic",
-            use_container_width=True,
+            width='stretch',
             key="editor_dash_main",
         )
         if st.button("💾 Instellingen opslaan", type="primary", key="save_dash_main"):
@@ -312,7 +312,7 @@ with st.expander("⚙️ Projectinstellingen aanpassen (Dashboard PRO)", expande
 st.markdown("---")
 col_sv, _ = st.columns([2, 5])
 with col_sv:
-    if st.button("💾 Alles opslaan naar Excel", type="primary", use_container_width=True):
+    if st.button("💾 Alles opslaan naar Excel", type="primary", width='stretch'):
         if save_all_to_excel():
             st.success("✅ Volledig opgeslagen!")
         else:

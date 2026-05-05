@@ -60,7 +60,7 @@ with tabs[0]:
                 annotations=[dict(text=f"<b>€ {totaal:,.0f}</b>",
                                   x=0.5, y=0.5, font_size=13, showarrow=False)],
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
     with col_r:
         st.markdown("##### 📊 Budget per Kamer")
@@ -77,7 +77,7 @@ with tabs[0]:
                 xaxis=dict(tickprefix="€", showgrid=True, gridcolor="#F3F4F6"),
                 margin=dict(l=0,r=80,t=0,b=0), height=320,
             )
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, width='stretch')
 
     st.markdown("##### 📋 Samenvatting per Kamer")
     if cats:
@@ -88,7 +88,7 @@ with tabs[0]:
         st.dataframe(
             df_sum.style.format({"Budget (€)": "€ {:,.0f}", "% van totaal": "{:.1f}%"})
                         .background_gradient(subset=["Budget (€)"], cmap="YlOrBr"),
-            use_container_width=True, hide_index=True,
+            width='stretch', hide_index=True,
         )
 
 # ── Tab 2: Bewerken ───────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ with tabs[1]:
             "Opmerking":              st.column_config.TextColumn("Opmerking"),
         },
         num_rows="dynamic",
-        use_container_width=True,
+        width='stretch',
         height=500,
         key="editor_inboedel",
     )
@@ -126,12 +126,12 @@ with tabs[1]:
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("💾 Opslaan in App", type="primary", use_container_width=True):
+        if st.button("💾 Opslaan in App", type="primary", width='stretch'):
             set_inboedel(edited)
             st.success("✅ Bijgewerkt!")
             st.rerun()
     with col2:
-        if st.button("💾 Opslaan naar Excel", use_container_width=True):
+        if st.button("💾 Opslaan naar Excel", width='stretch'):
             set_inboedel(edited)
             if save_inboedel(edited):
                 st.success("✅ Naar Excel!")
@@ -156,7 +156,7 @@ with tabs[2]:
             xaxis=dict(tickprefix="€"), margin=dict(l=0,r=80,t=40,b=60),
             height=360, legend=dict(orientation="h", y=-0.3),
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
 
         st.markdown("##### Aandeel per Kamer")
         for cat, bedrag in sorted(cats.items(), key=lambda x: -x[1]):

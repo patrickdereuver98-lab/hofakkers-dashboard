@@ -63,7 +63,7 @@ with tabs[0]:
                 annotations=[dict(text=f"<b>€ {totaal:,.0f}</b>",
                                   x=0.5, y=0.5, font_size=13, showarrow=False)],
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
     with col_r:
         st.markdown("##### 📊 Budget per Categorie (bar)")
@@ -84,7 +84,7 @@ with tabs[0]:
                 xaxis=dict(tickprefix="€", showgrid=True, gridcolor="#F3F4F6"),
                 margin=dict(l=0, r=80, t=0, b=0), height=320,
             )
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, width='stretch')
 
     # Categorie samenvatting tabel
     st.markdown("##### 📋 Samenvatting per Categorie")
@@ -96,7 +96,7 @@ with tabs[0]:
         st.dataframe(
             df_sum.style.format({"Budget (€)": "€ {:,.0f}", "% van totaal": "{:.1f}%"})
                         .background_gradient(subset=["Budget (€)"], cmap="YlOrBr"),
-            use_container_width=True, hide_index=True,
+            width='stretch', hide_index=True,
         )
 
 # ── Tab 2: Begroting Bewerken ─────────────────────────────────────────────────
@@ -120,7 +120,7 @@ with tabs[1]:
             "Opmerking":              st.column_config.TextColumn("Opmerking", width="medium"),
         },
         num_rows="dynamic",
-        use_container_width=True,
+        width='stretch',
         height=500,
         key="editor_verbouwing",
     )
@@ -137,12 +137,12 @@ with tabs[1]:
 
     col_s1, col_s2 = st.columns(2)
     with col_s1:
-        if st.button("💾 Opslaan in App", type="primary", use_container_width=True):
+        if st.button("💾 Opslaan in App", type="primary", width='stretch'):
             set_verbouwing(edited)
             st.success("✅ Begroting bijgewerkt!")
             st.rerun()
     with col_s2:
-        if st.button("💾 Opslaan naar Excel", use_container_width=True):
+        if st.button("💾 Opslaan naar Excel", width='stretch'):
             set_verbouwing(edited)
             if save_verbouwing(edited):
                 st.success("✅ Opgeslagen naar Excel!")
@@ -170,7 +170,7 @@ with tabs[2]:
             xaxis=dict(tickprefix="€"), margin=dict(l=0, r=80, t=40, b=0), height=360,
             legend=dict(orientation="h", y=-0.3),
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width='stretch')
 
         # Voortgangsbalk per categorie t.o.v. totaal
         st.markdown("##### 📊 Aandeel per Categorie")
