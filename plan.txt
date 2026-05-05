@@ -1,0 +1,9 @@
+INTEGRATION PLAN - Phase 2
+===========================
+
+1. Create utils/ui.py - Adapter layer for new UI patterns
+2. Create utils/state.py - State management layer
+3. Update utils/config.py - Add missing constants
+4. Update utils/excel_handler.py - Add save functions & getters
+5. Test imports and compilation
+
