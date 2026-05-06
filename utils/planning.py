@@ -77,38 +77,46 @@ def _get_today() -> date:
 
 def init_planning() -> None:
     """
-    Initialiseer planning in session_state als die er nog niet is.
-    Volgorde: ① al in session_state → return. ② Excel heeft Planning-sheet → laad die.
-    ③ Geen Excel-data → gebruik de 18 standaard-stappen.
-    Planning gaat nooit meer verloren bij herstart.
+    Initialiseer planning in session_state.
+
+    Volgorde (FIX v5):
+    1. Als planning al in session_state zit → niets doen
+    2. Probeer eerst te laden uit session_state['planning'] (gezet door load_all_data)
+    3. Probeer uit Excel te laden via load_planning_from_excel()
+    4. Valt terug op _DEFAULT_PLANNING als er nog niets is
+
+    Hierdoor gaat opgeslagen planning NOOIT verloren bij herstart.
     """
-    if "planning" in st.session_state and st.session_state["planning"]:
+    # Stap 1: al geladen
+    if st.session_state.get("planning"):
         return
 
-    # Probeer eerst uit Excel te laden
-    planning_from_excel = load_planning_from_excel()
-    if planning_from_excel:
-        st.session_state["planning"] = planning_from_excel
+    # Stap 2: load_all_data() heeft planning al in session_state gezet
+    # (als Planning-sheet in Excel bestaat) — dat is al afgehandeld in init()
+    # Hier checken we nogmaals voor het geval init_planning zonder init() wordt aangeroepen
+    excel_planning = load_planning_from_excel()
+    if excel_planning:
+        st.session_state["planning"] = excel_planning
         return
 
-    # Anders: defaults
-    today   = _get_today()
+    # Stap 3: Geen Excel-data — gebruik de standaard planning
+    today    = _get_today()
     planning = []
     for i, (taak, cat, verant, offset_s, duur, afh) in enumerate(_DEFAULT_PLANNING):
         start = today + timedelta(days=offset_s)
         eind  = start + timedelta(days=duur)
         planning.append({
-            "Volgorde":        i + 1,
-            "Taak":            taak,
-            "Categorie":       cat,
+            "Volgorde":          i + 1,
+            "Taak":              taak,
+            "Categorie":         cat,
             "Verantwoordelijke": verant,
-            "Startdatum":      str(start),
-            "Deadline":        str(eind),
-            "Status":          "Gepland",
-            "Prioriteit":      "Normaal",
-            "Afhankelijk_Van": afh,
-            "Budget_Ref":      cat,
-            "Notities":        "",
+            "Startdatum":        str(start),
+            "Deadline":          str(eind),
+            "Status":            "Gepland",
+            "Prioriteit":        "Normaal",
+            "Afhankelijk_Van":   afh,
+            "Budget_Ref":        cat,
+            "Notities":          "",
         })
 
     st.session_state["planning"] = planning
@@ -275,16 +283,11 @@ def get_gantt_data() -> pd.DataFrame:
             continue
         rows.append({
             "Task":     p["Taak"],
-            "Start":    start_d,
-            "Finish":   end_d,
+            "Start":    str(start_d),
+            "Finish":   str(end_d),
             "Resource": p["Categorie"],
             "Status":   p["Status"],
             "Prio":     p["Prioriteit"],
         })
-    df = pd.DataFrame(rows) if rows else pd.DataFrame(
+    return pd.DataFrame(rows) if rows else pd.DataFrame(
         columns=["Task","Start","Finish","Resource","Status","Prio"])
-    # Converteer naar datetime voor Plotly vline() compatibility
-    if not df.empty:
-        df["Start"] = pd.to_datetime(df["Start"])
-        df["Finish"] = pd.to_datetime(df["Finish"])
-    return df

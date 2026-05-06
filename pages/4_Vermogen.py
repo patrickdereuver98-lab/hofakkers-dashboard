@@ -20,8 +20,7 @@ init()
 sidebar(calc_maand_totalen(), calc_project())
 header("💎 Vermogen & Financieel Plan", "Patrick & Willianne · Hofakkers 44", "💎")
 
-# Proactieve notificaties (vermogen-alerts)
-render_notification_bar(max_visible=2, filter_page="Vermogen")
+render_notification_bar(max_visible=2, filter_page="Dashboard")
 
 proj = calc_project()
 verm = calc_spaargeld()
@@ -122,7 +121,7 @@ with tabs[0]:
     df_p = pd.DataFrame(proj_tabel, columns=["Omschrijving","Bedrag (€)"])
     st.dataframe(
         df_p.style.format({"Bedrag (€)":"€ {:,.0f}"})
-                  .map(lambda x: "color:#10B981;font-weight:600" if isinstance(x,(int,float)) and x>0
+                  .applymap(lambda x: "color:#10B981;font-weight:600" if isinstance(x,(int,float)) and x>0
                             else ("color:#EF4444;font-weight:600" if isinstance(x,(int,float)) and x<0 else ""),
                             subset=["Bedrag (€)"]),
         use_container_width=True, hide_index=True,

@@ -20,7 +20,6 @@ init()
 sidebar(calc_maand_totalen(), calc_project())
 header("💳 Maandelijkse Cashflow", "YNAB-stijl · Elke maand-euro heeft een bestemming", "💳")
 
-# Proactieve notificaties (cashflow-alerts)
 render_notification_bar(max_visible=2, filter_page="Cashflow")
 
 mt = calc_maand_totalen()

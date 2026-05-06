@@ -362,13 +362,21 @@ def sidebar(maand_tot: dict = None, project: dict = None) -> None:
         st.metric("Samen",     f"€ {pj.get('samen',0):,.0f}")
 
         st.markdown("---")
-        st.markdown("#### 🔄 Data & Backups")
+        st.markdown("#### 💾 Opslaan & Herstellen")
+        if st.button("💾 Alles opslaan naar Excel",
+                     use_container_width=True, type="primary"):
+            from utils.state import save_all_to_excel
+            if save_all_to_excel():
+                st.success("✅ Volledig opgeslagen!")
+            else:
+                st.error("❌ Opslaan mislukt.")
+
         if st.button("🔄 Herladen uit Excel", use_container_width=True):
             reload()
             st.success("✅ Verse data geladen!")
             st.rerun()
 
-        with st.expander("💾 Backup-historie"):
+        with st.expander("↩️ Backup-historie"):
             backups = list_backups()
             if backups:
                 st.caption(f"Laatste {len(backups)} backups (max 10)")
@@ -391,4 +399,4 @@ def sidebar(maand_tot: dict = None, project: dict = None) -> None:
                 st.caption("Geen backups (worden bij elke save gemaakt)")
 
         st.markdown("---")
-        st.caption("Hofakkers 44 · v3.0 · Auto-save naar Excel")
+        st.caption("Hofakkers 44 · v5.0 · Patrick & Willianne")

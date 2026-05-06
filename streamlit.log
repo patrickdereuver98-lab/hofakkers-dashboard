@@ -1,0 +1,159 @@
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://10.0.6.223:8501
+  External URL: http://172.166.151.125:8501
+
+2026-05-06 07:56:43.272 Uncaught app execution
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 687, in code_to_exec
+    _mpa_v1(self._main_script_path)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 166, in _mpa_v1
+    page.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/navigation/page.py", line 490, in run
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/hofakkers-dashboard/app.py", line 332, in <module>
+    edited  = st.data_editor(
+              ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/metrics_util.py", line 698, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/elements/widgets/data_editor.py", line 1100, in data_editor
+    _check_type_compatibilities(data_df, column_config_mapping, dataframe_schema)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/elements/widgets/data_editor.py", line 618, in _check_type_compatibilities
+    raise StreamlitAPIException(
+streamlit.errors.StreamlitAPIException: The configured column type `text` for column `Waarde` is not compatible for editing the underlying data type `ColumnDataKind.FLOAT`.
+
+You have following options to fix this: 1) choose a compatible type 2) disable the column 3) convert the column into a compatible data type.
+2026-05-06 07:57:25.553 Uncaught app execution
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 687, in code_to_exec
+    _mpa_v1(self._main_script_path)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 166, in _mpa_v1
+    page.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/navigation/page.py", line 490, in run
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/hofakkers-dashboard/pages/5_Planning.py", line 114, in <module>
+    fig.add_vline(
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/graph_objs/_figure.py", line 473, in add_vline
+    return super().add_vline(
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/basedatatypes.py", line 4152, in add_vline
+    self._process_multiple_axis_spanning_shapes(
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/basedatatypes.py", line 4093, in _process_multiple_axis_spanning_shapes
+    augmented_annotation = shapeannotation.axis_spanning_shape_annotation(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 216, in axis_spanning_shape_annotation
+    shape_dict = annotation_params_for_line(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 63, in annotation_params_for_line
+    eX = _mean(X)
+         ^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 7, in _mean
+    return float(sum(x)) / len(x)
+                 ^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 598, in pandas._libs.tslibs.timestamps._Timestamp.__radd__
+  File "pandas/_libs/tslibs/timestamps.pyx", line 580, in pandas._libs.tslibs.timestamps._Timestamp.__add__
+TypeError: Addition/subtraction of integers and integer-arrays with Timestamp is no longer supported.  Instead of adding/subtracting `n`, use `n * obj.freq`
+2026-05-06 07:58:26.248 Uncaught app execution
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 687, in code_to_exec
+    _mpa_v1(self._main_script_path)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 166, in _mpa_v1
+    page.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/navigation/page.py", line 490, in run
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/hofakkers-dashboard/app.py", line 332, in <module>
+    edited  = st.data_editor(
+              ^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/metrics_util.py", line 698, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/elements/widgets/data_editor.py", line 1100, in data_editor
+    _check_type_compatibilities(data_df, column_config_mapping, dataframe_schema)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/elements/widgets/data_editor.py", line 618, in _check_type_compatibilities
+    raise StreamlitAPIException(
+streamlit.errors.StreamlitAPIException: The configured column type `text` for column `Waarde` is not compatible for editing the underlying data type `ColumnDataKind.FLOAT`.
+
+You have following options to fix this: 1) choose a compatible type 2) disable the column 3) convert the column into a compatible data type.
+2026-05-06 08:00:01.723 Uncaught app execution
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 687, in code_to_exec
+    _mpa_v1(self._main_script_path)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 166, in _mpa_v1
+    page.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/navigation/page.py", line 490, in run
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/hofakkers-dashboard/pages/5_Planning.py", line 114, in <module>
+    fig.add_vline(
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/graph_objs/_figure.py", line 473, in add_vline
+    return super().add_vline(
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/basedatatypes.py", line 4152, in add_vline
+    self._process_multiple_axis_spanning_shapes(
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/basedatatypes.py", line 4093, in _process_multiple_axis_spanning_shapes
+    augmented_annotation = shapeannotation.axis_spanning_shape_annotation(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 216, in axis_spanning_shape_annotation
+    shape_dict = annotation_params_for_line(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 63, in annotation_params_for_line
+    eX = _mean(X)
+         ^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 7, in _mean
+    return float(sum(x)) / len(x)
+                 ^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 598, in pandas._libs.tslibs.timestamps._Timestamp.__radd__
+  File "pandas/_libs/tslibs/timestamps.pyx", line 580, in pandas._libs.tslibs.timestamps._Timestamp.__add__
+TypeError: Addition/subtraction of integers and integer-arrays with Timestamp is no longer supported.  Instead of adding/subtracting `n`, use `n * obj.freq`
+2026-05-06 08:03:11.866 Uncaught app execution
+Traceback (most recent call last):
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 687, in code_to_exec
+    _mpa_v1(self._main_script_path)
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 166, in _mpa_v1
+    page.run()
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/streamlit/navigation/page.py", line 490, in run
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/hofakkers-dashboard/pages/5_Planning.py", line 114, in <module>
+    fig.add_vline(
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/graph_objs/_figure.py", line 473, in add_vline
+    return super().add_vline(
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/basedatatypes.py", line 4152, in add_vline
+    self._process_multiple_axis_spanning_shapes(
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/basedatatypes.py", line 4093, in _process_multiple_axis_spanning_shapes
+    augmented_annotation = shapeannotation.axis_spanning_shape_annotation(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 216, in axis_spanning_shape_annotation
+    shape_dict = annotation_params_for_line(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 63, in annotation_params_for_line
+    eX = _mean(X)
+         ^^^^^^^^
+  File "/usr/local/python/3.12.1/lib/python3.12/site-packages/plotly/shapeannotation.py", line 7, in _mean
+    return float(sum(x)) / len(x)
+                 ^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 598, in pandas._libs.tslibs.timestamps._Timestamp.__radd__
+  File "pandas/_libs/tslibs/timestamps.pyx", line 580, in pandas._libs.tslibs.timestamps._Timestamp.__add__
+TypeError: Addition/subtraction of integers and integer-arrays with Timestamp is no longer supported.  Instead of adding/subtracting `n`, use `n * obj.freq`

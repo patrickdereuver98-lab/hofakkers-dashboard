@@ -368,6 +368,8 @@ def _parse_buffer(sheets: dict) -> pd.DataFrame:
     return df[BUFFER_COLS].copy()
 
 
+# ── Hoofd-loader ───────────────────────────────────────────────────────────
+
 def _parse_planning(sheets: dict) -> list[dict]:
     """
     Laad Planning-sheet naar lijst van dicts.
@@ -400,10 +402,12 @@ def _parse_planning(sheets: dict) -> list[dict]:
     return rows
 
 
-# ── Hoofd-loader ───────────────────────────────────────────────────────────
-
 def load_all_data() -> dict:
-    sheets    = _get_sheets()
+    """
+    Laad alle sheets. Planning-sheet wordt meegeladen zodat opgeslagen
+    planning niet verloren gaat bij herstart.
+    """
+    sheets = _get_sheets()
     return {
         "dashboard":  _parse_dashboard(sheets.get(SH_DASHBOARD)),
         "verbouwing": _parse_begroting(SH_VERBOUWING),

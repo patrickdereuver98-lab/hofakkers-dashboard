@@ -109,16 +109,21 @@ with tabs[0]:
                 height=max(320, len(df_gantt) * 28 + 80),
                 font=dict(family="Inter", size=11),
             )
-            # Vandaag-lijn
-            today_dt = pd.Timestamp(date.today())
-            fig.add_vline(
-                x=today_dt,
-                line_dash="dash",
-                line_color="#EF4444",
-                line_width=2,
-                annotation_text="Vandaag",
-                annotation_position="top",
-                annotation_font_color="#EF4444",
+            # Vandaag-lijn via add_shape (fix: add_vline geeft TypeError met
+            # pandas Timestamp-objecten die px.timeline aanmaakt)
+            today_str = str(date.today())
+            fig.add_shape(
+                type="line",
+                x0=today_str, x1=today_str,
+                y0=0, y1=1, yref="paper",
+                line=dict(color="#EF4444", width=2, dash="dash"),
+            )
+            fig.add_annotation(
+                x=today_str, y=1.02, yref="paper",
+                text="📅 Vandaag",
+                showarrow=False,
+                font=dict(color="#EF4444", size=11, weight=700),
+                xanchor="center",
             )
             st.plotly_chart(fig, use_container_width=True)
 

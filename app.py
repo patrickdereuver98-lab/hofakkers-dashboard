@@ -257,7 +257,7 @@ if not bva.empty:
         bva.style
            .format({"Begroot (€)":"€ {:,.0f}","Gerealiseerd (€)":"€ {:,.0f}",
                     "Verschil (€)":"€ {:,.0f}","% Gebruikt":"{:.1f}%"})
-           .map(_kleur_verschil, subset=["Verschil (€)"])
+           .applymap(_kleur_verschil, subset=["Verschil (€)"])
            .background_gradient(subset=["% Gebruikt"], cmap="RdYlGn_r", vmin=0, vmax=110)
     )
     st.dataframe(styled, use_container_width=True, hide_index=True, height=380)
